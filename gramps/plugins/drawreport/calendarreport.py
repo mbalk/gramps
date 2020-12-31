@@ -366,6 +366,9 @@ class Calendar(Report):
                                             '{person}, {age}',
                                             nyears).format(person=short_name,
                                                            age=nyears)
+                        text = '* ' + text
+                        if not alive:
+                            text = text + ' (†)'
                         self.add_day_item(text, month, day, marks=[mark])
                 if self.anniversaries:
                     family_list = person.get_family_handle_list()
@@ -434,6 +437,9 @@ class Calendar(Report):
                                             alive2 = probably_alive(spouse,
                                                         self.database,
                                                         prob_alive_date)
+
+                                            text = '⚭ ' + text
+
                                             if ((self.alive and alive1 and alive2) or not self.alive):
                                                 self.add_day_item(text, month, day,
                                                                   marks=[mark,s_m])
