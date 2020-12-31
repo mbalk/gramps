@@ -4,6 +4,7 @@
 # Copyright (C) 2008-2012  Brian G. Matherly
 # Copyright (C) 2010       Jakim Friant
 # Copyright (C) 2012-2014  Paul Franklin
+# Copyright (C) 2020,2021  Matthias Balk
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -101,6 +102,7 @@ class Calendar(Report):
         self.start_dow = get_value('start_dow')
         self.maiden_name = get_value('maiden_name')
         self.alive = get_value('alive')
+        self.include_death_date = get_value('include_death_date')
         self.birthdays = get_value('birthdays')
         self.text1 = get_value('text1')
         self.text2 = get_value('text2')
@@ -444,6 +446,30 @@ class Calendar(Report):
                                                 self.add_day_item(text, month, day,
                                                                   marks=[mark,s_m])
 
+                self._add_death_date(person)
+
+    def _add_death_date(self, person):
+        if not self.include_death_date:
+            return
+
+        death_ref = person.get_death_ref()
+        if not death_ref:
+            return
+
+        death_event = self.database.get_event_from_handle(death_ref.ref)
+        death_date = death_event.get_date_object()
+
+        if death_date is not None and death_date.is_valid():
+            death_date = gregorian(death_date)
+            text = '† {name}, {nyears}'.format(
+                    name=self.get_name(person),
+                    nyears=self.year - death_date.get_year())
+            self.add_day_item(text,
+                              death_date.get_month(),
+                              death_date.get_day(),
+                              marks=[utils.get_person_mark(self.database,
+                                                           person)])
+
 #------------------------------------------------------------------------
 #
 # CalendarOptions
@@ -563,6 +589,11 @@ class CalendarOptions(MenuReportOptions):
         anniversaries = BooleanOption(_("Include anniversaries"), True)
         anniversaries.set_help(_("Whether to include anniversaries"))
         add_option("anniversaries", anniversaries)
+
+        include_death_date = BooleanOption(_("Include death dates"), False)
+        include_death_date.set_help(
+                _("Include death anniversaries in the calendar"))
+        add_option("include_death_date", include_death_date)
 
     def __update_filters(self):
         """
