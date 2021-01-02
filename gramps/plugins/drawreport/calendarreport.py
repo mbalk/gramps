@@ -459,6 +459,9 @@ class Calendar(Report):
 
                 prob_alive_date = Date(self.year, month, day)
 
+                alive1 = probably_alive(person, self.database, prob_alive_date)
+                alive2 = probably_alive(wife, self.database, prob_alive_date)
+
                 nyears = self.year - year
                 if nyears == 0:
                     text = self._('%(wife)s and\n %(person)s, wedding') % {
@@ -466,6 +469,9 @@ class Calendar(Report):
                             'person' : short_name,
                             }
                 else:
+                    p_dead = ' (†)' if not alive1 else ''
+                    w_dead = ' (†)' if not alive2 else ''
+
                     # to see "nearby" comments
                     ngettext = self._locale.translation.ngettext
 
@@ -473,16 +479,10 @@ class Calendar(Report):
                     # untranslated
                     text = ngettext("{wife} and\n {person}, {nyears}",
                                     "{wife} and\n {person}, {nyears}",
-                                    nyears).format(wife=self.get_name(wife),
-                                                   person=short_name,
+                                    nyears).format(wife=self.get_name(wife) +
+                                                   w_dead,
+                                                   person=short_name + p_dead,
                                                    nyears=nyears)
-
-                alive1 = probably_alive(person,
-                            self.database,
-                            prob_alive_date)
-                alive2 = probably_alive(wife,
-                            self.database,
-                            prob_alive_date)
 
                 text = '⚭ ' + text
 
