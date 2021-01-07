@@ -34,6 +34,7 @@ import time
 # Gramps modules
 #
 #------------------------------------------------------------------------
+from gramps.gen.config import config
 from gramps.gen.const import GRAMPS_LOCALE as glocale
 _ = glocale.translation.gettext
 from gramps.gen.const import URL_HOMEPAGE
@@ -56,6 +57,7 @@ from gramps.gen.datehandler import displayer as date_displayer
 from gramps.gen.lib import (Date, EventRoleType, EventType, Name, NameType,
                             Person, Surname)
 from gramps.gen.lib.date import gregorian
+from gramps.gen.utils.symbols import Symbols
 
 import gramps.plugins.lib.libholiday as libholiday
 from gramps.plugins.lib.libholiday import g2iso
@@ -116,6 +118,15 @@ class Calendar(Report):
             raise ReportError(_("Person %s is not in the Database") % pid)
 
         self.set_locale(get_value('trans'))
+
+        self.__setup_symbols()
+
+    def __setup_symbols(self):
+        symbols = Symbols()
+        self.symb_bth = symbols.get_symbol_for_string(symbols.SYMBOL_BIRTH)
+        self.symb_mrg = symbols.get_symbol_for_string(symbols.SYMBOL_MARRIAGE)
+        death_symbol_idx = config.get('utf8.death-symbol')
+        self.symb_dth = symbols.get_death_symbol_for_char(death_symbol_idx)
 
     def get_name(self, person, maiden_name = None):
         """ Return person's name, unless maiden_name given,
@@ -385,9 +396,9 @@ class Calendar(Report):
                                     '{person}, {age}',
                                     nyears).format(person=short_name,
                                                    age=nyears)
-                text = '* ' + text
-                if not alive:
-                    text = text + ' (†)'
+
+                dth = ' (%s)' % (self.symb_dth) if not alive else ''
+                text = '%s %s%s' % (self.symb_bth, text, dth)
 
                 self.add_day_item(text,
                                   month,
@@ -469,8 +480,8 @@ class Calendar(Report):
                             'person' : short_name,
                             }
                 else:
-                    p_dead = ' (†)' if not alive1 else ''
-                    w_dead = ' (†)' if not alive2 else ''
+                    p_dead = ' (%s)' % (self.symb_dth) if not alive1 else ''
+                    w_dead = ' (%s)' % (self.symb_dth) if not alive2 else ''
 
                     # to see "nearby" comments
                     ngettext = self._locale.translation.ngettext
@@ -484,7 +495,7 @@ class Calendar(Report):
                                                    person=short_name + p_dead,
                                                    nyears=nyears)
 
-                text = '⚭ ' + text
+                text = '%s %s' % (self.symb_mrg, text)
 
                 if ((self.alive and alive1 and alive2) or not self.alive):
                     mark = utils.get_person_mark(self.database, person)
@@ -506,7 +517,8 @@ class Calendar(Report):
 
         if death_date is not None and death_date.is_valid():
             death_date = gregorian(death_date)
-            text = '† {name}, {nyears}'.format(
+            text = '{symbol} {name}, {nyears}'.format(
+                    symbol=self.symb_dth,
                     name=self.get_name(person),
                     nyears=self.year - death_date.get_year())
             self.add_day_item(text,
