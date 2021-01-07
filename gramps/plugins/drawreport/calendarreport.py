@@ -25,42 +25,39 @@
 # python modules
 #
 #------------------------------------------------------------------------
-from functools import partial
 import datetime
 import time
+from functools import partial
 
 #------------------------------------------------------------------------
 #
 # Gramps modules
 #
 #------------------------------------------------------------------------
+import gramps.plugins.lib.libholiday as libholiday
 from gramps.gen.config import config
 from gramps.gen.const import GRAMPS_LOCALE as glocale
-_ = glocale.translation.gettext
 from gramps.gen.const import URL_HOMEPAGE
+from gramps.gen.datehandler import displayer as date_displayer
 from gramps.gen.display.name import displayer as _nd
 from gramps.gen.errors import ReportError
-from gramps.gen.plug.docgen import (FontStyle, ParagraphStyle, GraphicsStyle,
-                                    FONT_SERIF, PARA_ALIGN_CENTER,
-                                    PARA_ALIGN_LEFT, PARA_ALIGN_RIGHT,
-                                    IndexMark, INDEX_TYPE_TOC)
-from gramps.gen.plug.docgen.fontscale import string_trim
-from gramps.gen.plug.menu import (BooleanOption, StringOption, NumberOption,
-                                  EnumeratedListOption, FilterOption,
-                                  PersonOption)
-from gramps.gen.plug.report import Report
-from gramps.gen.plug.report import utils
-from gramps.gen.plug.report import MenuReportOptions
-from gramps.gen.plug.report import stdoptions
-from gramps.gen.utils.alive import probably_alive
-from gramps.gen.datehandler import displayer as date_displayer
 from gramps.gen.lib import (Date, EventRoleType, EventType, Name, NameType,
                             Person, Surname)
 from gramps.gen.lib.date import gregorian
+from gramps.gen.plug.docgen import (FONT_SERIF, INDEX_TYPE_TOC,
+                                    PARA_ALIGN_CENTER, PARA_ALIGN_LEFT,
+                                    PARA_ALIGN_RIGHT, FontStyle, GraphicsStyle,
+                                    IndexMark, ParagraphStyle)
+from gramps.gen.plug.docgen.fontscale import string_trim
+from gramps.gen.plug.menu import (BooleanOption, EnumeratedListOption,
+                                  FilterOption, NumberOption, PersonOption,
+                                  StringOption)
+from gramps.gen.plug.report import MenuReportOptions, Report, stdoptions, utils
+from gramps.gen.utils.alive import probably_alive
 from gramps.gen.utils.symbols import Symbols
-
-import gramps.plugins.lib.libholiday as libholiday
 from gramps.plugins.lib.libholiday import g2iso
+
+_ = glocale.translation.gettext
 
 #------------------------------------------------------------------------
 #
